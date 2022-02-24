@@ -2,7 +2,7 @@ const mongoose=require("mongoose");
 
 const productSchema=new mongoose.Schema({
     name: String,
-    price: Number
+    price: {type: Number, required: true} /*Mongoose Validation*/
 });
 
 const Product=mongoose.model("Product",productSchema);

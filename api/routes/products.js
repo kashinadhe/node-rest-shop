@@ -9,8 +9,19 @@ const Product=require("../models/product");
 
 router.get('/',(req,res,next)=>{
     Product.find()
-    .then(result=>{
-        res.status(200).json(result);
+    .select('_id name price')
+    .then(docs=>{
+        const response={
+            count: docs.length,
+            products: docs.map(doc=>{
+                return{
+                    _id: doc._id,
+                    name: doc.name,
+                    price: doc.price
+                }
+            })
+        }
+        res.status(200).json(response);
     })
 }); /*Here we won't write /products because the 
     /products route has been already forwarded to this file from app.js*/
@@ -21,11 +32,21 @@ router.get('/:productId',(req,res,next)=>{/*/:<express routing parameter>*/
     Product.findOne({_id: id})
     .then(result=>{
         if(result){
-            res.status(200).json(result);
+
+            res.status(200).json({
+                name: result.name,
+                price: result.price
+            });
         }
         else{
             res.status(404).json({message: "Id does not exists!"});
         }
+    })
+    .catch(err=>{
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
     });
 });
 
@@ -50,6 +71,12 @@ router.patch('/:productId',(req,res,next)=>{
     .then(()=>{
         res.status(200).json({
             message: "Product price UPDATED"
+        });
+    })
+    .catch(err=>{
+        console.log(err);
+        res.status(500).json({
+            error: err
         });
     });
 });
