@@ -11,15 +11,6 @@ app.use(bodyParser.json());
 
 mongoose.connect("mongodb+srv://admin-kaustubh:Kashin12@cluster0.gf3u2.mongodb.net/nodeRestShopDB",{useNewUrlParser:true});
 
-/*CROSS ORIGIN REQUEST SHARING*/
-app.use((req,res,next)=>{
-    res.header('Access-Control-Allow-Origin','*');
-    res.header('Access-Control-Allow-Headers','*');
-    if(res.method==="OPTIONS"){
-        res.header("Access-Control-Allow-Methods","GET, POST, PUT, PATCH, DELETE");
-        return res.status(200).json({});
-    }
-})
 
 /*Anything starting with "/products" in the URL will be forwarded to products.js file*/
 app.use('/products',productRoutes);
