@@ -6,6 +6,10 @@ const productRoutes=require('./api/routes/products');
 const orderRoutes=require('./api/routes/orders');
 const mongoose=require('mongoose');
 
+/*inside the below app.use() we want app to parse 
+only those requests that target '/upload' route*/
+app.use('/uploads',express.static('uploads')) /*Making uploads folder public*/
+
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 

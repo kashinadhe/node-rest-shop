@@ -4,12 +4,45 @@ const router=express.Router(); /*router is a sub-package which has
                                 the capabilities to conviniently handle different routes, 
                                 to reach different endpoints with different HTTP words*/
 const Product=require("../models/product");
+const mongoose=require("mongoose");
+
+/*MULTER is an npm package that makes it easy to handle file uploads.*/
+const multer=require("multer"); /*Very efficient as compared to body-parser*/
+
+const storage=multer.diskStorage({  /*The disk storage engine gives you 
+                                    full control on storing files to disk.*/
+    destination: (req, file, cb)=>{ /*cb is a callback function*/
+        cb(null, "./uploads/");
+    },
+    filename: (req, file, cb)=>{    /*filename key specifies what 
+                                    name format the file should be saved*/
+        cb(null, file.originalname);
+    }
+});
+
+const fileFilter=(req, file, cb)=>{ /*Filtering files*/
+    if(file.mimetype==="image/jpeg" || file.mimetype==="image/png"){
+        cb(null,true);
+    }
+    else{
+        cb(null,false);
+        console.log("Upload only jpeg or png files");
+    }
+}
+
+const upload=multer({
+    storage: storage, 
+    limits:{
+        fileSize: 1024*1024*10, /*accepting file of max size 10 MB*/
+    },
+    fileFilter: fileFilter
+}); /*all incoming files are stored in uploads folder*/
+
 
 /*Using Router() to register different routes*/
-
 router.get('/',(req,res,next)=>{
     Product.find()
-    .select('_id name price')
+    .select('name price productImage')
     .then(docs=>{
         const response={
             count: docs.length,
@@ -17,7 +50,8 @@ router.get('/',(req,res,next)=>{
                 return{
                     _id: doc._id,
                     name: doc.name,
-                    price: doc.price
+                    price: doc.price,
+                    productImage: doc.productImage
                 }
             })
         }
@@ -51,10 +85,15 @@ router.get('/:productId',(req,res,next)=>{/*/:<express routing parameter>*/
 });
 
 /*Inserting new product to the products collection*/
-router.post('/',(req,res,next)=>{
+/*upload.single() parses only 1 icoming file*/
+router.post('/',upload.single("productImage"),(req,res,next)=>{
+    console.log(req.file);  /*New request object 'file' 
+                            that is available due to 
+                            upload.single() middleware*/
     const product=new Product({
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path /*Storing incoming file path into Product collection*/
     });
     product.save();
     res.status(200).json({
