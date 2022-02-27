@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../../Keys");
 
 const User = require("../models/user");
+const checkAuth = require("../middleware/check-auth");
 
 router.post("/signup", (req, res, next) => {
   User.findOne({ email: req.body.email }, function (err, user) {
@@ -90,7 +91,7 @@ router.post("/signin", (req, res, next) => {
   });
 });
 
-router.delete("/:userId", (req, res, next) => {
+router.delete("/:userId", checkAuth, (req, res, next) => {
   User.deleteOne({ _id: req.params.userId }).then((deletedUser) => {
     res.status(200).json({
       message: "User has been successfully deleted",

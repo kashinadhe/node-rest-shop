@@ -4,6 +4,7 @@ const router = express.Router(); /*router is a sub-package which has
                                 to reach different endpoints with different HTTP words*/
 const Product = require("../models/product");
 const mongoose = require("mongoose");
+const checkAuth = require("../middleware/check-auth");
 
 /*MULTER is an npm package that makes it easy to handle file uploads.*/
 const multer = require("multer"); /*Very efficient as compared to body-parser*/
@@ -86,7 +87,8 @@ router.get("/:productId", (req, res, next) => {
 
 /*Inserting new product to the products collection*/
 /*upload.single() parses only 1 incoming file*/
-router.post("/", upload.single("productImage"), (req, res, next) => {
+/*checkAuth is a middleware which checks whether the user is signed in and then that user will be able to make post request to the products route*/
+router.post("/", checkAuth, upload.single("productImage"), (req, res, next) => {
   console.log(req.file); /*New request object 'file' 
                             that is available due to 
                             upload.single() middleware*/
@@ -104,7 +106,7 @@ router.post("/", upload.single("productImage"), (req, res, next) => {
 });
 
 /*Updating product details*/
-router.patch("/:productId", (req, res, next) => {
+router.patch("/:productId", checkAuth, (req, res, next) => {
   const id = req.params.productId;
   const newPrice = req.body.newPrice;
   Product.updateOne({ _id: id }, { price: newPrice })
@@ -122,7 +124,7 @@ router.patch("/:productId", (req, res, next) => {
 });
 
 /*Deleting products*/
-router.delete("/:productId", (req, res, next) => {
+router.delete("/:productId", checkAuth, (req, res, next) => {
   const id = req.params.productId;
   Product.deleteOne({ _id: id })
     .then(() => {
